@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/>
+		<meta name="Auhthor" content="高万靖"/>
+		<meta name="Description" content="字节跳动实习 地理教研 地图模型库"/>
+		<title>长江三角洲_三维地图 - 测试</title>
+
+		<script src="supports/jquery-1.11.0.min.js"></script>
+		<script src="supports/sha1.js"></script>
+		<script src="supports/Cesium/Cesium.js"></script>
+		<script src="supports/viewerCesiumNavigationMixin.js"></script>
+		<link href="supports/Cesium/Widgets/widgets.css" rel="stylesheet" type="text/css" />
+		<link href="css/map_style.css" rel="stylesheet" type="text/css" />
+		<script src="coordinate_transform.js"></script>
+		<script src="amap_api.js"></script>
+		<script src="map_overlay.js"></script>
+		<script src="map.js"></script>
+		<script src="map_contour.js"></script>
+
+		<script type="text/javascript">
+			$(document).ready(function(){
+				earth = new MapControl({
+						is_global: false,
+						show_atmosphere: false,
+						view_center: [121.5500, 31.3110, 80000],
+						orientation: {
+							heading: 0,
+							pitch: -80,
+							roll: 0
+						},
+						altitude_range: {
+							min: 0,
+							max: 200
+						},
+						model: "changjiang"
+					});
+			});
+		</script>
+	</head>
+
+	<body>
+		<div id="cesium_container" class="cesium_container"></div>
+		<button class="toolbar_button cesium-button left_first top_first" onclick="toggleToolbarById('toolbar_1')" title="高程菜单">
+			<svg t="1619414068785" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
+				p-id="1945" width="24" height="24">
+				<path
+					d="M832.2 264.6H192.3c-35.2 0-64-28.8-64-64s28.8-64 64-64h639.8c35.2 0 64 28.8 64 64 0.1 35.2-28.7 64-63.9 64zM832.2 577.9H196.1c-35.2 0-64-28.8-64-64s28.8-64 64-64h636.1c35.2 0 64 28.8 64 64s-28.8 64-64 64zM832.2 896.9H192.3c-35.2 0-64-28.8-64-64s28.8-64 64-64h639.8c35.2 0 64 28.8 64 64 0.1 35.2-28.7 64-63.9 64z"
+					fill="#ffffff" p-id="1946"></path>
+			</svg>
+		</button>
+		<div id="toolbar_1" class="toolbar left_first top_second">
+			<div class="tool-container">
+				<form id="form_search" method="get">
+					<input class="search" type="search" id="search" placeholder="输入地名以搜索位置" />
+					<input class="cesium-button" type="submit" value="搜索" />
+				</form>
+			</div>
+			<div class="tool-container">
+				<button type="button" id="ps" onclick="save_to_file(earth.viewer.scene)">截图</button>
+				<button type="button" id="distance" onclick="earth.measureLineSpace()">测距</button>
+				<button type="button" id="area" onclick="earth.measureAreaSpace()">测面积</button>
+				<button type="button" id="rm" onclick="earth.removeEntities()">清除标记</button>
+			</div>
+			<div class="tool-container">
+				<label><input type="radio" name="shadingMaterials" value="none" data-bind="checked: selectedShading">
+					遥感底图</label>
+				<label><input type="radio" name="shadingMaterials" value="elevation" data-bind="checked: selectedShading">
+					高程渲染</label>
+			</div>
+			<div class="tool-container">
+				<input type="checkbox" data-bind="checked: enableContour">
+				<label>等高线</label>
+				<button style="float:right" type="button" data-bind="click: changeColor, enable: enableContour">
+					更换线颜色
+				</button>
+			</div>
+			<div class="tool-container">
+				<div>
+					<label>等高线间距：</label>
+					<input style="width: 136px" type="range" min="10.0" max="500.0" step="10.0"
+						data-bind="value: contourSpacing, valueUpdate: 'input', enable: enableContour">
+					<span data-bind="text: contourSpacing"></span>m
+				</div>
+				<div>
+					<label>线粗：</label>
+					<input style="width: 125px" type="range" min="1.0" max="10.0" step="1.0"
+						data-bind="value: contourWidth, valueUpdate: 'input', enable: enableContour">
+					<span data-bind="text: contourWidth"></span>px
+				</div>
+			</div>
+			<hr />
+			<div class="tool-container">
+				已添加的路径点：
+				<button style="float:right;" class="cesium-button" type="button" id="route_planning">路线规划</button>
+				<ol id="pathpoints">
+					<li style="display: none"><a id="point"></a></li>
+				</ol>
+			</div>
+		</div>
+		<button class="toolbar_button cesium-button left_second top_first" onclick="earth.getLocation()" title="定位">
+			<svg t="1618995800639" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
+				p-id="2577" width="32" height="32">
+				<path d="M422 427.023a90 90 0 1 0 180 0 90 90 0 1 0-180 0z" p-id="2578" fill="#ffffff"></path>
+				<path
+					d="M512 910.402c-19.14 0-37.482-5.854-53.042-16.929-14.063-10.01-24.926-23.596-31.589-39.46L255.043 585.177l-0.154-0.25C225.522 537.209 210 482.605 210 427.021c0-80.667 31.414-156.506 88.454-213.546S431.333 125.021 512 125.021s156.506 31.414 213.546 88.454C782.587 270.515 814 346.354 814 427.021c0 55.849-15.655 110.671-45.274 158.539l-0.264 0.419-172.081 268.716c-6.755 15.726-17.66 29.176-31.704 39.055-15.485 10.895-33.7 16.652-52.677 16.652zM309.246 551.141l175.494 273.78 1.194 3.197c4.149 11.107 14.381 18.284 26.066 18.284 11.584 0 21.791-7.071 26.004-18.015l1.165-3.028L714.43 551.678C737.701 513.983 750 470.884 750 427.021c0-63.572-24.756-123.339-69.709-168.292-44.952-44.951-104.719-69.708-168.291-69.708s-123.339 24.756-168.292 69.708S274 363.449 274 427.021c0 43.64 12.186 86.552 35.246 124.12z"
+					p-id="2579" fill="#ffffff"></path>
+			</svg>
+		</button>
+		<button class="toolbar_button cesium-button left_third top_first" onclick="earth.select_pathpoint()" title="地图选点">
+			<span style='font-size:24px; color:white; font-style:normal; font-weight:normal;'>+</span>
+		</button>
+		<button class="toolbar_button cesium-button left_fourth top_first" onclick="earth.share()" title="分享">
+			<svg t="1618995341553" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
+				p-id="1148" width="32" height="32">
+				<path
+					d="M763.9552 893.696H231.1168c-43.2128 0-79.2064-37.4272-79.2064-83.5072V285.952c0-46.08 35.84-83.5584 79.2064-83.5584h318.2592a28.8256 28.8256 0 1 1 0 57.6512H231.1168c-11.52 0-21.6064 11.52-21.6064 25.9072V808.96c0 14.3872 10.24 25.9072 21.6064 25.9072h532.8384c11.52 0 21.6064-11.52 21.6064-25.9072v-289.6896a28.8256 28.8256 0 0 1 57.6512 0v290.9184c0 46.08-36.0448 83.5072-79.2576 83.5072z"
+					fill="#ffffff" p-id="1149"></path>
+				<path
+					d="M411.136 720.896a28.8768 28.8768 0 0 1-28.8256-28.8256c0-253.44 207.4112-460.8 460.8-460.8a28.8256 28.8256 0 0 1 0 57.6 404.48 404.48 0 0 0-403.3024 403.2512 28.8768 28.8768 0 0 1-28.672 28.7744z"
+					fill="#ffffff" p-id="1150"></path>
+				<path
+					d="M742.4 463.104a29.0816 29.0816 0 0 1-24.5248-43.264l86.4256-149.8112-149.76-86.3232a27.3408 27.3408 0 0 1-10.24-38.912 27.392 27.392 0 0 1 38.8608-10.24L857.6 235.52a27.392 27.392 0 0 1 10.24 38.912l-100.8128 174.08a25.6 25.6 0 0 1-24.6272 14.592z"
+					fill="#ffffff" p-id="1151"></path>
+			</svg>
+		</button>
+		<div class="coordination">
+			<div class="coordination_item">
+				经度：<span id="longitude_show"></span>°
+			</div>
+			<div class="coordination_item">
+				纬度：<span id="latitude_show"></span>°
+			</div>
+			<div class="coordination_item">
+				海拔：<span id="altitude_show"></span> m
+			</div>
+			<div class="coordination_item">
+				视角高：<span id="view_height_show"></span>km
+			</div>
+		</div>
+		<div id="popup" class="popup">
+			<div class="popup_head">
+				<a class="popup_locate">
+					<svg t="1618995800639" class="icon" viewBox="0 0 1024 1024" version="1.1"
+						xmlns="http://www.w3.org/2000/svg" p-id="2577" width="20" height="20">
+						<path d="M422 427.023a90 90 0 1 0 180 0 90 90 0 1 0-180 0z" p-id="2578" fill="#000"></path>
+						<path
+							d="M512 910.402c-19.14 0-37.482-5.854-53.042-16.929-14.063-10.01-24.926-23.596-31.589-39.46L255.043 585.177l-0.154-0.25C225.522 537.209 210 482.605 210 427.021c0-80.667 31.414-156.506 88.454-213.546S431.333 125.021 512 125.021s156.506 31.414 213.546 88.454C782.587 270.515 814 346.354 814 427.021c0 55.849-15.655 110.671-45.274 158.539l-0.264 0.419-172.081 268.716c-6.755 15.726-17.66 29.176-31.704 39.055-15.485 10.895-33.7 16.652-52.677 16.652zM309.246 551.141l175.494 273.78 1.194 3.197c4.149 11.107 14.381 18.284 26.066 18.284 11.584 0 21.791-7.071 26.004-18.015l1.165-3.028L714.43 551.678C737.701 513.983 750 470.884 750 427.021c0-63.572-24.756-123.339-69.709-168.292-44.952-44.951-104.719-69.708-168.291-69.708s-123.339 24.756-168.292 69.708S274 363.449 274 427.021c0 43.64 12.186 86.552 35.246 124.12z"
+							p-id="2579" fill="#000"></path>
+					</svg>
+				</a>
+				<a class="popup_mini">
+					<svg t="1619412716777" class="icon" viewBox="0 0 1024 1024" version="1.1"
+						xmlns="http://www.w3.org/2000/svg" p-id="2385" width="16" height="16">
+						<path d="M98 273h655.3v655.3H98V273z m87.4 87.3v480.5h480.5V360.3H185.4z" p-id="2386"
+							fill="#2c2c2c"></path>
+						<path d="M840.6 185.6H360.1V98.2H928v567.9h-87.4z" p-id="2387" fill="#2c2c2c"></path>
+					</svg>
+				</a>
+			</div>
+			<div class="popup_extend">
+				<div class="popup_doc">
+					<button class="popup_doc popup_button" title="附上">附上飞书云文档</button>
+				</div>
+				<div class="popup_content"></div>
+				<div class="popup_coord"></div>
+				<div class="popup_foot">
+					<button class="popup_yes popup_button" title="添加">添加</button>
+					<button class="popup_no popup_button" title="删除">删除</button>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

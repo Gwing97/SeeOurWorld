@@ -1,0 +1,286 @@
+/* 全屏显示 */
+html, body, .cesium_container{
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	user-select: none;
+}
+
+a {
+	cursor: pointer;
+}
+
+hr {
+	background-color: white;
+	margin: 3px 10px 3px 10px;
+}
+
+ol {
+	margin: 5px;
+    padding: 0 0 0 20px;
+}
+
+.left_first {
+	left: 5px;
+}
+
+.left_second {
+	left: 42px;
+}
+
+.left_third {
+	left: 79px;
+}
+
+.left_fourth {
+	left: 116px;
+}
+
+.top_first {
+	top: 5px;
+}
+
+.top_second {
+	top: 42px;
+}
+
+.top_third {
+	top: 79px;
+}
+
+.top_fourth {
+	top: 116px;
+}
+
+.toolbar_button {
+	width: 32px;
+	height: 32px;
+	margin: 0;
+	padding: 0;
+	background-color: rgba(47, 53, 60, 0.8);
+	color: white;
+	border: none;
+	border-radius: 5px;
+	z-index: 10;
+	position: absolute;
+}
+
+.cesium-viewer-toolbar {
+	top: 5px;
+	z-index: 10;
+}
+
+.toolbar {
+	display: block;
+	box-sizing: content-box;
+	margin: 0;
+	padding: 0;
+	position: absolute;
+	background-color: rgba(47, 53, 60, 0.8);
+	color: white;
+	border-radius: 5px;
+	overflow: auto;
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	transform: translate(0,-20%);
+	visibility: hidden;
+	opacity: 0;
+	transition: visibility 0s .2s,opacity .2s ease-in,transform .2s ease-in;
+	z-index: 5;
+	max-width: 90%;
+}
+
+.toolbar-visible {
+	transform: translate(0,0);
+	visibility: visible;
+	opacity: 1;
+	transition: opacity .2s ease-out,transform .2s ease-out;
+}
+
+.tool-container {
+	/*background-color: #303336;*/
+	padding: 3px 5px 3px 5px;
+	margin: 5px;
+}
+
+.tool-container input {
+	vertical-align: middle;
+	margin-top: 0;
+}
+
+input.search {
+	border: solid 1px #444;
+	background-color: rgba(255,255,255,.75);
+	display: inline-block;
+	vertical-align: middle;
+	height: 28px;
+	margin: 0;
+	padding: 0 10px 0 10px;
+	box-sizing: border-box;
+	user-select: all;
+}
+
+.coordination {
+	padding: 2px;
+	position: absolute;
+	bottom: 10px;
+	left: 10px;
+	z-index:10;
+	font-size:15px;
+	background-color: rgba(47, 53, 60, 0.8);
+	color: white;
+	border-radius: 5px;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	max-width: 50%;
+}
+
+.coordination_item {
+	margin: 1px 10px 1px 10px;
+	padding: 0;
+	float: left;
+	font-size: 14px;
+	color: white;
+}
+
+.distance-legend {
+	border-radius: 5px;
+	right: 10px;
+	bottom: 10px;
+	z-index: 10;
+}
+
+.compass {
+	top: 50px;
+	z-index: 2;
+}
+
+.compass-outer-ring {
+	fill: rgba(255, 255, 255, 0.8);
+	z-index: 2;
+}
+
+.navigation-controls {
+	top: 150px;
+	border-radius: 5px;
+	background-color: rgba(47, 53, 60, 0.8);
+	border: 1px solid rgba(255, 255, 255, 0.8);
+	z-index: 2;
+}
+
+.navigation-control {
+	margin: 0;
+	padding: 0;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+#popip {
+	display: none;
+}
+
+.popup {
+	position: absolute;
+	background-color: white;
+	-webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+	filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+	padding: 5px;
+	border-radius: 7px;
+	border: 1px solid #cccccc;
+	z-index: 0;
+}
+
+.popup:after, .popup:before {
+	top: 100%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+
+.popup:after {
+	border-top-color: white;
+	border-width: 10px;
+	left: 48px;
+	margin-left: -10px;
+}
+
+.popup:before {
+	border-top-color: #cccccc;
+	border-width: 11px;
+	left: 48px;
+	margin-left: -11px;
+}
+
+.popup_extend {
+	min-width: 150px;
+	max-width: 275px;
+	min-height: 100px;
+}
+
+.popup_extend_hide {
+	display: none;
+}
+
+.popup_head {
+	height: 16px;
+	min-width: 52px;
+}
+
+.popup_coord, .popup_content {
+	user-select: text;
+}
+
+.popup_foot {
+	height: 32px;
+}
+
+.popup_button {
+	display: inline-block;
+    /* background: #48b; */
+    /* color: black; */
+    /* fill: #edffff; */
+	border: 1px solid;
+    border-radius: 4px;
+    padding: 4px 5px;
+    margin: 3px 2px;
+    cursor: pointer;
+    overflow: hidden;
+    text-decoration: none;
+    text-align: center;
+    font-weight: bold;
+}
+
+.popup_no {
+	position: absolute;
+	bottom: 2px;
+	right: 4px;
+}
+
+.popup_yes {
+	position: absolute;
+	bottom: 2px;
+	left: 4px;
+}
+
+.popup_locate {
+	cursor: pointer;
+	position: absolute;
+	top: 2px;
+	left: 6px;
+}
+
+.popup_mini {
+	cursor: pointer;
+	position: absolute;
+	top: 2px;
+	right: 6px;
+}
+
+/*.popup-closer:after {
+		content: "X";
+}*/
