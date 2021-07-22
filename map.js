@@ -49,7 +49,7 @@ var MapControl = function (opts) {
 		model: "",
 		is_global: true,
 		show_atmosphere: true,
-		cesium_access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhOTIxYTNhMy03YzBhLTQ4ZGQtOWY0Zi0yZjlhNTNlNTI1MmQiLCJpZCI6NDUxNTksImlhdCI6MTYxNDc3MTM3OH0.Xw0nDGFaxQjAaBklt_u3KwmiYMD2h74SzwfA72bE3EE"
+		cesium_access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzNTYyZmIwOC00MDVhLTRlODEtYTRmYS1lZGU4YjhmMWJlZDIiLCJpZCI6NDUxNTksImlhdCI6MTYyNjkzNTA4NH0.WG1cA1YXgEQFE4Dw7aGdailrJaxSRaRuLsRsfoyhbik"
 	}, opts);
 
 	me.pathpoints = Array();
