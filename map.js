@@ -1,5 +1,6 @@
-//var local_ip = "192.168.0.107";	//局域网上的本机IP地址，若发布至互联网后，填写公网ip
-var local_ip = "localhost";
+// var local_ip = "192.168.0.107";	//局域网上的本机IP地址，若发布至互联网后，填写公网ip
+// var local_ip = "localhost";
+var local_ip = "www.skylight.xin";
 
 function getQueryVariable(variable) {
 	const query = window.location.search.substring(1);
@@ -48,7 +49,7 @@ var MapControl = function (opts) {
 		model: "",
 		is_global: true,
 		show_atmosphere: true,
-		cesium_access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiZDk3MTZiMi1mMzlkLTRkMDEtOTZhMC1hMzhlMTkzMzk1YTAiLCJpZCI6NDUxNTksImlhdCI6MTYxNDc3MjYxOH0.Yps8cIDHNn71LokaYQnF0X199E82fr8Xawua_b4opJs"
+		cesium_access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJhOTIxYTNhMy03YzBhLTQ4ZGQtOWY0Zi0yZjlhNTNlNTI1MmQiLCJpZCI6NDUxNTksImlhdCI6MTYxNDc3MTM3OH0.Xw0nDGFaxQjAaBklt_u3KwmiYMD2h74SzwfA72bE3EE"
 	}, opts);
 
 	me.pathpoints = Array();
