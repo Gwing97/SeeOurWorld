@@ -370,6 +370,19 @@ MapControl.prototype.init = function () {
 			}
 		},
 	});
+		
+	if (!me.opts.show_atmosphere) {
+		me.viewer.scene.skyBox.show = false;	//天空盒，即星空贴图
+		me.viewer.scene.skyAtmosphere.show = false;	//大气效果
+		// me.viewer.scene.globe.showGroundAtmosphere = true;
+
+		//隐藏地球默认的蓝色背景
+		me.viewer.scene.globe.baseColor = Cesium.Color.TRANSPARENT;
+		//隐藏雾效果
+		me.viewer.scene.fog.enabled = false;
+		//隐藏黑色背景
+		//me.viewer.scene.backgroundColor=Cesium.Color.TRANSPARENT;
+	}
 
 	me.viewer._cesiumWidget._creditContainer.style.display = "none";	//去除版权信息
 
