@@ -31,7 +31,7 @@ var MapControl = function (opts) {
 	me.opts = $.extend(true, {//opts中的配置会覆盖以下默认配置
 		cesium_container: "cesium_container",
 		toolbar_container: "toolbar_1",
-		view_center: [105, 35, 10000000],
+		view_center: [105, 35, 15000000],
 		home_orientation: {
 			heading: 0,
 			pitch: -90,
@@ -49,6 +49,7 @@ var MapControl = function (opts) {
 		model: "",
 		is_global: true,
 		show_atmosphere: true,
+		enable_light: false,
 		cesium_access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzNTYyZmIwOC00MDVhLTRlODEtYTRmYS1lZGU4YjhmMWJlZDIiLCJpZCI6NDUxNTksImlhdCI6MTYyNjkzNTA4NH0.WG1cA1YXgEQFE4Dw7aGdailrJaxSRaRuLsRsfoyhbik"
 	}, opts);
 
@@ -283,36 +284,6 @@ MapControl.prototype.init = function () {
 		}
 	});
 
-	var img_ALOS_wmts = new Cesium.ProviderViewModel({
-		name: "ALOS遥感影像（本地WMTS）",
-		tooltip: "ALOS遥感影像（本地WMTS）",
-		iconUrl: "images/remote_sensing.png",
-		creationFunction: function () {
-			var _matrixIds = [
-				'EPSG:4326:0', 'EPSG:4326:1', 'EPSG:4326:2', 'EPSG:4326:3', 'EPSG:4326:4', 
-				'EPSG:4326:5', 'EPSG:4326:6', 'EPSG:4326:7', 'EPSG:4326:8', 'EPSG:4326:9', 
-				'EPSG:4326:10', 'EPSG:4326:11', 'EPSG:4326:12', 'EPSG:4326:13', 'EPSG:4326:14', 
-				'EPSG:4326:15'
-			];
-			var provider = new Cesium.WebMapTileServiceImageryProvider({
-					url: "/geoserver/gwc/service/wmts",
-					layer: "ALOS:"+me.opts.model,
-					service: 'WMTS',
-					version: '1.0.0',
-					request: 'GetTile',
-					style: '',
-					format:'image/png',
-					tileMatrixSetID: 'EPSG:4326',
-					tileMatrixLabels: _matrixIds,
-					tilingScheme: new Cesium.GeographicTilingScheme({
-						numberOfLevelZeroTilesX: 2,
-						numberOfLevelZeroTilesY: 1
-					})
-				})
-			return provider;
-		}
-	});
-
 	var cesium_terrain = new Cesium.ProviderViewModel({
 		name: "Cesium全球地形",
 		tooltip: "Cesium全球地形",
@@ -337,25 +308,18 @@ MapControl.prototype.init = function () {
 		}
 	});
 
-	var local_terrain = new Cesium.ProviderViewModel({
-		name: "局部模型地形",
-		tooltip: "局部模型地形",
-		iconUrl: "./images/mountain.png",
-		creationFunction:  function () {
-			var provider = new Cesium.CesiumTerrainProvider({
-				requestWaterMask: false,	//不开启水面效果
-				requestVertexNormals: true,
-				url : 'http://'+local_ip+':8000/tilesets/'+ me.opts.model	//更换为本地高程数据源
-			})
-			return provider;
-		}
-	});
-
 	Cesium.Ion.defaultAccessToken = me.opts.cesium_access_token;
 
+	let enable_animation = false;
+	let enable_timeline = false;
+	if(me.opts.enable_time_widgt){
+		enable_animation = true;
+		enable_timeline = true;
+	}
+
 	me.viewer = new Cesium.Viewer(me.opts.cesium_container, {
-		animation: false,	//是否创建动画小器件，左下角仪表
-		timeline: false,	//是否显示时间线控件
+		animation: enable_animation,	//是否创建动画小器件，左下角仪表
+		timeline: enable_timeline,	//是否显示时间线控件
 		geocoder: false,	//是否显示地名查找控件，右上角查询按钮
 		fullscreenButton: false,	//是否显示右下角全屏按钮
 		navigationHelpButton: false,	//是否显示右上角的帮助按钮
@@ -380,9 +344,6 @@ MapControl.prototype.init = function () {
 			img_WorldSoil
 		],//可供BaseLayerPicker选择的图像图层ProviderViewModel数组
 		terrainProviderViewModels: [cesium_terrain, ellipsoid_terrain],
-		//		selectedImageryProviderViewModel: img_ALOS_wmts,//当前地形图层的显示模型，仅baseLayerPicker设为true有意义
-		//		selectedTerrainProviderViewModel: local_terrain,
-		//		terrainProvider: Cesium.createWorldTerrain(),		//cesium自带的世界地形
 
 		// 解决截图后图片没有内容，无法得到地图场景的问题
 		contextOptions: {
@@ -413,71 +374,81 @@ MapControl.prototype.init = function () {
 	me.viewer.scene.fxaa = true
 	me.viewer.scene.postProcessStages.fxaa.enabled = true
 
-	if(!me.opts.is_global){
-		me.viewer.baseLayerPicker.viewModel.imageryProviderViewModels.push(img_ALOS_wmts);
-		me.viewer.baseLayerPicker.viewModel.terrainProviderViewModels.push(local_terrain);
-		//设置默认的遥感影像源，本地遥感影像
-		me.viewer.baseLayerPicker.viewModel.selectedImagery= me.viewer.baseLayerPicker.viewModel.imageryProviderViewModels.slice(-1)[0];
-		me.viewer.baseLayerPicker.viewModel.selectedTerrain= me.viewer.baseLayerPicker.viewModel.terrainProviderViewModels.slice(-1)[0];
-	}else{
-		//设置MapBox为默认的遥感影像
-		me.viewer.baseLayerPicker.viewModel.selectedImagery = me.viewer.baseLayerPicker.viewModel.imageryProviderViewModels[3];
-		me.viewer.baseLayerPicker.viewModel.selectedTerrain = me.viewer.baseLayerPicker.viewModel.terrainProviderViewModels[0];
+	//设置MapBox为默认的遥感影像
+	me.viewer.baseLayerPicker.viewModel.selectedImagery = me.viewer.baseLayerPicker.viewModel.imageryProviderViewModels[4];
+	me.viewer.baseLayerPicker.viewModel.selectedTerrain = me.viewer.baseLayerPicker.viewModel.terrainProviderViewModels[0];
 
-		var tianditu_flag = false
-		var google_flag = false
+	var tianditu_flag = false
+	var google_flag = false
 
-		//若可以连接上Google，则设置Google影像为默认的遥感影像
-		$.ajax({
-			url: "https://www.google.com/maps/vt?lyrs=s&x=0&y=0&z=0",
-			method: "get",
-			success: function () {
-				google_flag = true
-				console.log("成功连接至Google服务器");
+	//若可以连接上Google，则设置Google影像为默认的遥感影像
+	$.ajax({
+		url: "https://www.google.com/maps/vt?lyrs=s&x=0&y=0&z=0",
+		method: "get",
+		success: function () {
+			google_flag = true
+			console.log("成功连接至Google服务器");
 
-				//若可以获取天地图标注图层，则添加带有天地图标注图层的MapBox影像
-				$.ajax({
-					url: 'https://t0.tianditu.gov.cn/DataServer?T=ibo_w&x=0&y=0&l=0&tk=' + tianditu_token,
-					method: "get",
-					success: function () {
-						tianditu_flag = true;
-						console.log("成功获取天地图标注图层");
+			//若可以获取天地图标注图层，则添加带有天地图标注图层的MapBox影像
+			$.ajax({
+				url: 'https://t0.tianditu.gov.cn/DataServer?T=ibo_w&x=0&y=0&l=0&tk=' + tianditu_token,
+				method: "get",
+				success: function () {
+					tianditu_flag = true;
+					console.log("成功获取天地图标注图层");
 
-						if(tianditu_flag){
-							if(google_flag){
-								me.viewer.baseLayerPicker.viewModel.selectedImagery = me.viewer.baseLayerPicker.viewModel.imageryProviderViewModels[1];
-							} else {
-								me.viewer.baseLayerPicker.viewModel.selectedImagery = me.viewer.baseLayerPicker.viewModel.imageryProviderViewModels[4];
-							}
+					if(tianditu_flag){
+						if(google_flag){
+							me.viewer.baseLayerPicker.viewModel.selectedImagery = me.viewer.baseLayerPicker.viewModel.imageryProviderViewModels[1];
 						} else {
-							if(google_flag){
-								me.viewer.baseLayerPicker.viewModel.selectedImagery = me.viewer.baseLayerPicker.viewModel.imageryProviderViewModels[0];
-							} else {
-								me.viewer.baseLayerPicker.viewModel.selectedImagery = me.viewer.baseLayerPicker.viewModel.imageryProviderViewModels[3];
-							}
+							me.viewer.baseLayerPicker.viewModel.selectedImagery = me.viewer.baseLayerPicker.viewModel.imageryProviderViewModels[4];
 						}
-					},
-					error: function () {
-						tianditu_flag = false
-						console.log("无法获取天地图标注图层");
-					},
-					timeout: 5000
-				})
-			},
-			error: function () {
-				google_flag = false
-				console.log("无法连接至Google服务器");
-			},
-			timeout: 5000
-		})
+					} else {
+						if(google_flag){
+							me.viewer.baseLayerPicker.viewModel.selectedImagery = me.viewer.baseLayerPicker.viewModel.imageryProviderViewModels[0];
+						} else {
+							me.viewer.baseLayerPicker.viewModel.selectedImagery = me.viewer.baseLayerPicker.viewModel.imageryProviderViewModels[3];
+						}
+					}
+				},
+				error: function () {
+					tianditu_flag = false
+					console.log("无法获取天地图标注图层");
+				},
+				timeout: 5000
+			})
+		},
+		error: function () {
+			google_flag = false
+			console.log("无法连接至Google服务器");
+		},
+		timeout: 5000
+	})
+
+	if(!me.opts.is_global){
+		let SenceRectangle = Cesium.Rectangle.fromDegrees(
+			me.opts.view_center[0] - 0.4,
+			me.opts.view_center[1] - 0.3,
+			me.opts.view_center[0] + 0.4,
+			me.opts.view_center[1] + 0.3
+		);
+		
+		me.viewer.scene.globe.cartographicLimitRectangle = SenceRectangle;
+		me.viewer.scene.globe.backFaceCulling = true;
 	}
 
-	//开启光照
-	//me.viewer.scene.globe.enableLighting = true;
+	if(me.opts.enable_light){
+		//开启光照
+		me.viewer.scene.globe.enableLighting = true;
 
-	//设置时间，调整太阳高度角
-	//var utc=Cesium.JulianDate.fromDate(new Date("2021/04/15 02:00:00"));//UTC
-	//me.viewer.clockViewModel.currentTime = Cesium.JulianDate.addHours(utc,8,new Cesium.JulianDate());//北京时间=UTC+8=GMT+8
+		me.viewer.scene.globe.lightingFadeOutDistance = 1e6;
+		me.viewer.scene.globe.lightingFadeInDistance = 2e6;
+		me.viewer.scene.globe.nightFadeOutDistance = 1e6;
+		me.viewer.scene.globe.nightFadeInDistance = 2e6;
+		
+		//设置时间，调整太阳高度角
+		me.viewer.clockViewModel.currentTime = Cesium.JulianDate.fromDate(new Date());
+	}
 
 	//调试用选项
 	//me.viewer.extend(Cesium.viewerCesiumInspectorMixin);
@@ -493,6 +464,7 @@ MapControl.prototype.init = function () {
 	if (!me.opts.show_atmosphere) {
 		me.viewer.scene.skyBox.show = false;	//天空盒，即星空贴图
 		me.viewer.scene.skyAtmosphere.show = false;	//大气效果
+		me.viewer.scene.globe.showGroundAtmosphere = true;
 
 		//隐藏地球默认的蓝色背景
 		me.viewer.scene.globe.baseColor = Cesium.Color.TRANSPARENT;
@@ -513,6 +485,17 @@ MapControl.prototype.init = function () {
 	// extend our view by the cesium navigaton mixin
 	me.viewer.extend(Cesium.viewerCesiumNavigationMixin, options);
 
+	if(me.opts.enable_time_widgt){
+		$(".coordination").css({
+			"bottom": "35px",
+			"right": "10px",
+			"left": "auto"
+		});
+		$(".distance-legend").css({
+			"bottom": "70px"
+		});
+	}
+
 	var orientation_setting
 	if(me.opts.is_global){
 		orientation_setting = me.home_orientation
@@ -524,22 +507,32 @@ MapControl.prototype.init = function () {
 	me.viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (commandInfo) {
 		//飞回指定位置
 		me.viewer.camera.flyTo({
-			// Cesium的坐标是以地心为原点，一向指向南美洲，一向指向亚洲，一向指向北极州
-			// fromDegrees()方法，将经纬度和高程转换为世界坐标
-			destination: Cesium.Cartesian3.fromDegrees(...me.opts.view_center),
+			destination: Cesium.Cartesian3.fromDegrees(
+				location.longitude - location.height_above * Math.cos(orientation_setting.pitch) * Math.sin(orientation_setting.heading) / 111319.55,
+				location.latitude - location.height_above * Math.cos(orientation_setting.pitch) * Math.cos(orientation_setting.heading) / 111319.55,
+				location.height_above * Math.sin(-orientation_setting.pitch)
+			),
 			orientation: orientation_setting
 		});
 		// Tell the home button not to do anything
 		commandInfo.cancel = true;
 	});
 
-	// 设置自定义起始位置
+	let location = {
+		longitude: me.opts.view_center[0],
+		latitude: me.opts.view_center[1],
+		height_above: me.opts.view_center[2]
+	}
+	
 	me.viewer.camera.setView({
-		// Cesium的坐标是以地心为原点，一向指向南美洲，一向指向亚洲，一向指向北极州
-		// fromDegrees()方法，将经纬度和高程转换为世界坐标
-		destination: Cesium.Cartesian3.fromDegrees(...me.opts.view_center),
+		destination: Cesium.Cartesian3.fromDegrees(
+			location.longitude - location.height_above * Math.cos(orientation_setting.pitch) * Math.sin(orientation_setting.heading) / 111319.55,
+			location.latitude - location.height_above * Math.cos(orientation_setting.pitch) * Math.cos(orientation_setting.heading) / 111319.55,
+			location.height_above * Math.sin(-orientation_setting.pitch)
+		),
 		orientation: orientation_setting
 	});
+	
 
 	var longitude_show = $('#longitude_show').get(0);
 	var latitude_show = $('#latitude_show').get(0);
@@ -574,7 +567,6 @@ MapControl.prototype.init = function () {
 	var handler = new Cesium.ScreenSpaceEventHandler(canvas);
 	handler.setInputAction(show_coordinate, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 	handler.setInputAction(show_coordinate, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-
 };
 
 MapControl.prototype.get_altitude = function (longitude, latitude) {

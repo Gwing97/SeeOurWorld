@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html>
+
 	<head>
-		<meta charset="UTF-8"/>
+		<meta charset="utf-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/>
 		<meta name="Auhthor" content="高万靖"/>
 		<meta name="Description" content="字节跳动实习 地理教研 地图模型库"/>
-		<title>长江三角洲_三维地图 - 测试</title>
+		<title>全球晨昏线</title>
 
+		<script src="https://sf1-scmcdn-tos.pstatp.com/goofy/ee/lark/h5jssdk/lark/js_sdk/h5-js-sdk-1.5.2.js"></script>
+		<script src="lark_api.js"></script>
 		<script src="supports/jquery-1.11.0.min.js"></script>
 		<script src="supports/sha1.js"></script>
 		<script src="supports/Cesium/Cesium.js"></script>
@@ -18,25 +21,16 @@
 		<script src="map_overlay.js"></script>
 		<script src="map.js"></script>
 		<script src="map_contour.js"></script>
-
+		
 		<script type="text/javascript">
-			$(document).ready(function(){
+
+			$(document).ready(function () {
 				earth = new MapControl({
-						is_global: false,
-						show_atmosphere: false,
-						view_center: [121.65, 31.3110, 30000],
-						orientation: {
-							heading: 0,
-							pitch: -80,
-							roll: 0
-						},
-						altitude_range: {
-							min: 0,
-							max: 200
-						},
-						model: "changjiang"
+						enable_light: true,
+						enable_time_widgt: true
 					});
 			});
+
 		</script>
 	</head>
 
@@ -172,4 +166,5 @@
 			</div>
 		</div>
 	</body>
+
 </html>
