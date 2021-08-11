@@ -312,20 +312,10 @@ MapControl.prototype.init = function () {
 
 	let enable_animation = false;
 	let enable_timeline = false;
-	let enable_skyBox = true;
-	let enable_skyAtmosphere = true;
-
 	if(me.opts.enable_time_widgt){
 		enable_animation = true;
 		enable_timeline = true;
 	}
-
-	if (!me.opts.show_atmosphere) {
-		enable_skyBox = false;	//天空盒，即星空贴图
-		enable_skyAtmosphere = false;	//大气效果
-		// me.viewer.scene.globe.showGroundAtmosphere = true;
-	}
-
 
 	me.viewer = new Cesium.Viewer(me.opts.cesium_container, {
 		animation: enable_animation,	//是否创建动画小器件，左下角仪表
@@ -336,8 +326,6 @@ MapControl.prototype.init = function () {
 		homeButton: true,	//是否显示Home按钮
 		showRenderLoopErrors: false,//如果设为true，将在一个HTML面板中显示错误信息
 		sceneModePicker: true,//是否显示3D/2D选择器
-		skyBox: enable_skyBox,	//天空盒，即星空贴图
-		skyAtmosphere: enable_skyAtmosphere,
 
 		baseLayerPicker: true,//是否显示图层选择器
 		scene3DOnly: false,//如果设置为true，则所有几何图形以3D模式绘制以节约GPU资源
@@ -385,15 +373,6 @@ MapControl.prototype.init = function () {
 	}
 
 	me.viewer._cesiumWidget._creditContainer.style.display = "none";	//去除版权信息
-
-	if (!me.opts.show_atmosphere) {
-		//隐藏地球默认的蓝色背景
-		me.viewer.scene.globe.baseColor = Cesium.Color.TRANSPARENT;
-		//隐藏雾效果
-		me.viewer.scene.fog.enabled = false;
-		//隐藏黑色背景
-		//me.viewer.scene.backgroundColor=Cesium.Color.TRANSPARENT;
-	}
 
 	// 判断是否支持图像渲染像素化处理
 	var supportsImageRenderingPixelated = me.viewer.cesiumWidget._supportsImageRenderingPixelated;
@@ -494,6 +473,19 @@ MapControl.prototype.init = function () {
 
 	// Enable depth testing so things behind the terrain disappear.
 	me.viewer.scene.globe.depthTestAgainstTerrain = true;
+
+	if (!me.opts.show_atmosphere) {
+		me.viewer.scene.skyBox.show = false;	//天空盒，即星空贴图
+		me.viewer.scene.skyAtmosphere.show = false;	//大气效果
+		me.viewer.scene.globe.showGroundAtmosphere = true;
+
+		//隐藏地球默认的蓝色背景
+		me.viewer.scene.globe.baseColor = Cesium.Color.TRANSPARENT;
+		//隐藏雾效果
+		me.viewer.scene.fog.enabled = false;
+		//隐藏黑色背景
+		//me.viewer.scene.backgroundColor=Cesium.Color.TRANSPARENT;
+	}
 
 	//导航栏
 	var options = {
